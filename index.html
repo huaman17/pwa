@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memoria Espacial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #0a0e29;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 10px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 5px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 10px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #6ee7ff;
+            text-shadow: 0 0 10px #6ee7ff, 0 0 20px #6ee7ff;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 20px;
+            background: rgba(13, 19, 53, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(110, 231, 255, 0.5);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat span {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #6ee7ff;
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            perspective: 1000px;
+        }
+        
+        .card {
+            height: 120px;
+            width: 120px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #1a1f4d, #283471);
+            transform: rotateY(180deg);
+            font-size: 2.5rem;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #283471, #1a1f4d);
+            border: 2px solid #6ee7ff;
+        }
+        
+        .card-back::before {
+            content: "?";
+            font-size: 3rem;
+            color: rgba(110, 231, 255, 0.3);
+        }
+        
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #6ee7ff, #3b83f6);
+            color: #0a0e29;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(110, 231, 255, 0.5);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(110, 231, 255, 0.8);
+        }
+        
+        .win-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 41, 0.95);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .win-content {
+            background: rgba(13, 19, 53, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(110, 231, 255, 0.7);
+            max-width: 90%;
+            width: 400px;
+        }
+        
+        .win-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #6ee7ff;
+        }
+        
+        .win-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 600px) {
+            .game-board {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .card {
+                height: 90px;
+                width: 90px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stat span {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .card {
+                height: 70px;
+                width: 70px;
+            }
+            
+            .card-front {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Memoria Espacial</h1>
+        <div class="stats">
+            <div class="stat">
+                <span id="moves">0</span>
+                Movimientos
+            </div>
+            <div class="stat">
+                <span id="timer">00:00</span>
+                Tiempo
+            </div>
+            <div class="stat">
+                <span id="pairs">0</span>
+                Pares
+            </div>
+        </div>
+    </header>
+    
+    <div class="game-container">
+        <div class="game-board" id="gameBoard"></div>
+    </div>
+    
+    <div class="controls">
+        <button id="restartBtn">Reiniciar</button>
+        <button id="newGameBtn">Nuevo Juego</button>
+    </div>
+    
+    <div class="win-message" id="winMessage">
+        <div class="win-content">
+            <h2>¡Felicidades!</h2>
+            <p>Has completado el juego en <span id="finalMoves">0</span> movimientos y <span id="finalTime">00:00</span> segundos.</p>
+            <button id="playAgainBtn">Jugar de nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const gameBoard = document.getElementById('gameBoard');
+            const movesElement = document.getElementById('moves');
+            const timerElement = document.getElementById('timer');
+            const pairsElement = document.getElementById('pairs');
+            const restartBtn = document.getElementById('restartBtn');
+            const newGameBtn = document.getElementById('newGameBtn');
+            const winMessage = document.getElementById('winMessage');
+            const finalMoves = document.getElementById('finalMoves');
+            const finalTime = document.getElementById('finalTime');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            
+            // Variables del juego
+            let cards = [];
+            let hasFlippedCard = false;
+            let lockBoard = false;
+            let firstCard, secondCard;
+            let moves = 0;
+            let matchedPairs = 0;
+            let totalPairs = 8;
+            let timer = null;
+            let seconds = 0;
+            
+            // Símbolos para las cartas (emojis espaciales)
+            const cardSymbols = ['🚀', '🛸', '🛰️', '👽', '🌕', '🌎', '⭐', '🌌'];
+            
+            // Inicializar el juego
+            function initGame() {
+                moves = 0;
+                matchedPairs = 0;
+                seconds = 0;
+                movesElement.textContent = moves;
+                pairsElement.textContent = matchedPairs;
+                timerElement.textContent = '00:00';
+                clearInterval(timer);
+                
+                // Crear pares de cartas
+                cards = [...cardSymbols, ...cardSymbols];
+                
+                // Barajar las cartas
+                shuffleCards();
+                
+                // Generar el tablero
+                gameBoard.innerHTML = '';
+                cards.forEach((symbol, index) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.dataset.symbol = symbol;
+                    
+                    const cardFront = document.createElement('div');
+                    cardFront.classList.add('card-front');
+                    cardFront.innerHTML = symbol;
+                    
+                    const cardBack = document.createElement('div');
+                    cardBack.classList.add('card-back');
+                    
+                    card.appendChild(cardFront);
+                    card.appendChild(cardBack);
+                    
+                    card.addEventListener('click', flipCard);
+                    gameBoard.appendChild(card);
+                });
+            }
+            
+            // Barajar las cartas (algoritmo Fisher-Yates)
+            function shuffleCards() {
+                for (let i = cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cards[i], cards[j]] = [cards[j], cards[i]];
+                }
+            }
+            
+            // Voltear una carta
+            function flipCard() {
+                if (lockBoard) return;
+                if (this === firstCard) return;
+                if (this.classList.contains('flipped')) return;
+                
+                this.classList.add('flipped');
+                
+                if (!hasFlippedCard) {
+                    // Primer click
+                    hasFlippedCard = true;
+                    firstCard = this;
+                    
+                    // Iniciar temporizador en el primer movimiento
+                    if (moves === 0) {
+                        startTimer();
+                    }
+                    
+                    return;
+                }
+                
+                // Segundo click
+                secondCard = this;
+                checkForMatch();
+            }
+            
+            // Comprobar si las cartas coinciden
+            function checkForMatch() {
+                let isMatch = firstCard.dataset.symbol === secondCard.dataset.symbol;
+                
+                isMatch ? disableCards() : unflipCards();
+                
+                // Actualizar movimientos
+                moves++;
+                movesElement.textContent = moves;
+            }
+            
+            // Deshabilitar cartas coincidentes
+            function disableCards() {
+                firstCard.removeEventListener('click', flipCard);
+                secondCard.removeEventListener('click', flipCard);
+                
+                // Efecto visual de coincidencia
+                firstCard.style.backgroundColor = '#2ecc71';
+                secondCard.style.backgroundColor = '#2ecc71';
+                
+                setTimeout(() => {
+                    firstCard.style.backgroundColor = '';
+                    secondCard.style.backgroundColor = '';
+                }, 300);
+                
+                matchedPairs++;
+                pairsElement.textContent = matchedPairs;
+                
+                resetBoard();
+                
+                // Comprobar si el juego ha terminado
+                if (matchedPairs === totalPairs) {
+                    endGame();
+                }
+            }
+            
+            // Volver a voltear cartas no coincidentes
+            function unflipCards() {
+                lockBoard = true;
+                
+                // Efecto visual de error
+                firstCard.style.backgroundColor = '#e74c3c';
+                secondCard.style.backgroundColor = '#e74c3c';
+                
+                setTimeout(() => {
+                    firstCard.style.backgroundColor = '';
+                    secondCard.style.backgroundColor = '';
+                    
+                    firstCard.classList.remove('flipped');
+                    secondCard.classList.remove('flipped');
+                    
+                    resetBoard();
+                }, 1000);
+            }
+            
+            // Reiniciar el tablero después de cada turno
+            function resetBoard() {
+                [hasFlippedCard, lockBoard] = [false, false];
+                [firstCard, secondCard] = [null, null];
+            }
+            
+            // Iniciar temporizador
+            function startTimer() {
+                timer = setInterval(() => {
+                    seconds++;
+                    const minutes = Math.floor(seconds / 60);
+                    const remainingSeconds = seconds % 60;
+                    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+            
+            // Finalizar el juego
+            function endGame() {
+                clearInterval(timer);
+                
+                // Mostrar mensaje de victoria
+                finalMoves.textContent = moves;
+                finalTime.textContent = timerElement.textContent;
+                
+                setTimeout(() => {
+                    winMessage.style.display = 'flex';
+                }, 1000);
+            }
+            
+            // Reiniciar el juego
+            restartBtn.addEventListener('click', initGame);
+            
+            // Nuevo juego (igual que reiniciar por ahora)
+            newGameBtn.addEventListener('click', initGame);
+            
+            // Jugar de nuevo
+            playAgainBtn.addEventListener('click', () => {
+                winMessage.style.display = 'none';
+                initGame();
+            });
+            
+            // Iniciar el juego al cargar la página
+            initGame();
+        });
+    </script>
+</body>
+</html>
