@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi PWA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mi Aplicación PWA</h1>
+            <div class="status">
+                <span id="connection-status" class="status-online">En línea</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="content">
+                <h2>Bienvenido a la PWA</h2>
+                <p>Esta es una aplicación web progresiva que funciona online y offline.</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>📱 Instalable</h3>
+                        <p>Puedes instalar esta app en tu dispositivo</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>⚡ Rápida</h3>
+                        <p>Carga instantáneamente gracias al cache</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📶 Offline</h3>
+                        <p>Funciona sin conexión a internet</p>
+                    </div>
+                </div>
+
+                <button id="install-btn" class="install-button" style="display: none;">
+                    Instalar App
+                </button>
+
+                <div class="data-section">
+                    <h3>Datos en tiempo real</h3>
+                    <div id="data-container">
+                        <p id="current-time">Cargando hora actual...</p>
+                        <p id="random-data">Cargando datos aleatorios...</p>
+                    </div>
+                    <button id="refresh-btn" class="refresh-button">Actualizar Datos</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Mi PWA. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <script src="pwa-app.js"></script>
+</body>
+</html>
